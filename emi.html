@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+  table {
+    width: 100%;
+    border-spacing: 10px;
+  }
+
+  td {
+    width: 100px;
+    padding: 5px;
+  }
+
+  input[type="text"] {
+    width: 100px;
+  }
+
+  input[type="range"] {
+    width: 100%;
+  }
+</style>
+
+<body>
+    <h1 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">EMI Calculator</h1>
+    <hr >
+    <div style="width: 400px; margin: auto; border: 2px solid rgba(211, 211, 211, 0.533); font-family: Arial, Helvetica, sans-serif; padding: 50px;">
+        
+        <table >
+            <tr>
+                <td align="left"><label for="p">Principal Amount:</label></td>
+                <td align="right"><label id="p"></label></td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center"><input type="range" min="0" max="100000" value="50000" step="0.01" id="p_range"></td>
+            </tr>
+            <tr>
+                <td align="left"><label for="r">Rate:</label></td>
+                <td align="right"><label id="r"></label></td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center"><input type="range" min="6" max="10" value="6.5" step="0.01" id="r_range"></td>
+            </tr>
+            <tr>
+                <td align="left"><label for="t">Loan Tenure:</label></td>
+                <td align="right"><label id="t"></label></td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center"><input type="range" min="1" max="30" value="5" step="1" id="t_range"></td>
+            </tr>
+            <tr>
+                <td align="left" >Monthly EMI</td>
+                <td align="right" ><label id="Monthly_EMI"></label></td>
+            </tr>
+            <tr>
+                <td align="left" >Principal Amount</td>
+                <td align="right" ><label id="P_Amount"></label ></td>
+            </tr>
+            <tr>
+                <td align="left" >Total Interest</td>
+                <td align="right" ><label id="total_interest"></label></td>
+            </tr>
+            <tr>
+                <td align="left" >Total Amount</td>
+                <td align="right"><label id="total_Amount"></label></td>
+            </tr>
+        </table>
+        <div style="width:200px; height:200px; margin: auto;">
+            <canvas id="chart"></canvas>
+        </div>
+    </div>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+let chart;
+
+function drawChart(P, interest) {
+
+    
+    if (chart) {
+        chart.destroy();
+    }
+
+    let ctx = document.getElementById("chart");
+
+    chart = new Chart(ctx, {
+        type: "pie",
+        data: {
+            labels: ["Principal", "Interest"],
+            datasets: [{
+                data: [P, interest],
+                backgroundColor: ["green", "red"]
+            }]
+        }
+    });
+}
+
+    function PMT(rate, nper, pv,fv=0) 
+    {
+        if (rate === 0) return -(pv + fv) / nper;
+
+        const pvif = Math.pow(1 + rate, nper);
+        let pmt = (rate * (pv * pvif + fv)) / (pvif - 1);
+
+        return pmt;
+    }
+
+    document.getElementById("t").innerText=document.getElementById("t_range").value;
+    document.getElementById("p").innerText=document.getElementById("p_range").value;
+    document.getElementById("r").innerText=document.getElementById("r_range").value;
+
+    function calculate() {
+    let P = Number(p_range.value);
+    let R = Number(r_range.value);
+    let T = Number(t_range.value);
+
+    let rate = R/12 /100
+    let n = T*12;           
+
+    let pmt = PMT(rate, n, P); 
+
+    
+    let Monthly_EMI = Math.abs(pmt);
+
+    let total_amount = Monthly_EMI * n;
+    let total_interest = total_amount - P;
+
+    
+    document.getElementById("Monthly_EMI").innerText = Monthly_EMI.toFixed(2);
+    document.getElementById("total_Amount").innerText = total_amount.toFixed(2);
+    document.getElementById("P_Amount").innerText = P.toFixed(2);
+    document.getElementById("total_interest").innerText = total_interest.toFixed(2);
+
+    drawChart(P, total_interest);
+}
+
+    let p_range = document.getElementById("p_range");
+    let p = document.getElementById("p");
+
+    let r_range = document.getElementById("r_range");
+    let r = document.getElementById("r");
+
+    let t_range = document.getElementById("t_range");
+    let t = document.getElementById("t");
+
+    p_range.oninput = function(){p.innerText=p_range.value; calculate();}
+    r_range.oninput = function(){r.innerText=r_range.value; calculate();}
+    t_range.oninput = function(){t.innerText=t_range.value; calculate();}
+
+
+
+    
+</script>
+
+</html>
